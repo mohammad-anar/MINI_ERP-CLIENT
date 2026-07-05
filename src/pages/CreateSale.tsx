@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGetProductsQuery } from '../redux/api/productApi';
 import { useCreateSaleMutation } from '../redux/api/salesApi';
+import { getImageUrl } from '../helpers/image';
 import {
   Search,
   Plus,
@@ -167,7 +168,7 @@ export const CreateSale: React.FC = () => {
                     }`}
                   >
                     <img
-                      src={`http://localhost:5000${product.image}`}
+                      src={getImageUrl(product.image)}
                       alt={product.name}
                       className="h-12 w-12 object-cover rounded-lg border border-slate-100 dark:border-slate-800"
                       onError={(e) => {
@@ -240,7 +241,7 @@ export const CreateSale: React.FC = () => {
                   className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 text-xs border border-slate-100/50 dark:border-slate-900/50"
                 >
                   <img
-                    src={`http://localhost:5000${item.image}`}
+                    src={getImageUrl(item.image)}
                     alt={item.name}
                     className="h-10 w-10 object-cover rounded-lg border border-slate-100 dark:border-slate-800"
                     onError={(e) => {

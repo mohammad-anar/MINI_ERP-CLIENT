@@ -7,6 +7,7 @@ import {
   useDeleteProductMutation,
 } from '../redux/api/productApi';
 import { useAppSelector } from '../redux/hooks';
+import { getImageUrl } from '../helpers/image';
 import {
   Plus,
   Search,
@@ -116,7 +117,7 @@ export const Products: React.FC = () => {
     setPurchasePrice(product.purchasePrice.toString());
     setSellingPrice(product.sellingPrice.toString());
     setStockQuantity(product.stockQuantity.toString());
-    setImagePreview(`http://localhost:5000${product.image}`);
+    setImagePreview(getImageUrl(product.image));
     setIsEditOpen(true);
   };
 
@@ -282,7 +283,7 @@ export const Products: React.FC = () => {
                   >
                     <td className="py-3 px-5">
                       <img
-                        src={`http://localhost:5000${product.image}`}
+                        src={getImageUrl(product.image)}
                         alt={product.name}
                         className="h-10 w-10 object-cover rounded-lg border border-slate-100 dark:border-slate-800"
                         onError={(e) => {

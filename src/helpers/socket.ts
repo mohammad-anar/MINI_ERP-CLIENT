@@ -5,7 +5,12 @@ let socket: Socket | null = null;
 export const initiateSocketConnection = (userId: string, role: string) => {
   if (socket) return socket;
 
-  socket = io('http://localhost:5000', {
+  const backendUrl =
+    window.location.hostname === 'localhost'
+      ? 'http://localhost:5000'
+      : 'https://mini-erp-server-34md.onrender.com';
+
+  socket = io(backendUrl, {
     transports: ['websocket', 'polling'],
   });
 

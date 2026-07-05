@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { logout } from '../../redux/slices/authSlice';
+import { getImageUrl } from '../../helpers/image';
 import {
   initiateSocketConnection,
   disconnectSocket,
@@ -237,7 +238,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             {/* Profile pill */}
             <div className="flex items-center gap-2.5">
               <img
-                src={user?.image || 'https://i.ibb.co/z5YHLV9/profile.png'}
+                src={getImageUrl(user?.image) || 'https://i.ibb.co/z5YHLV9/profile.png'}
                 alt="Profile"
                 className="h-8 w-8 rounded-full border border-slate-200 dark:border-slate-800 object-cover"
                 onError={(e) => {

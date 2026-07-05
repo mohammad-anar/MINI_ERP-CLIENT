@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useGetSalesHistoryQuery } from '../redux/api/salesApi';
+import { getImageUrl } from '../helpers/image';
 import { History, User, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 
 export const SalesHistory: React.FC = () => {
@@ -98,7 +99,7 @@ export const SalesHistory: React.FC = () => {
                             className="flex items-center gap-4 p-3 rounded-lg bg-white dark:bg-slate-950 border border-slate-200/50 dark:border-slate-900"
                           >
                             <img
-                              src={`http://localhost:5000${productDetail.image}`}
+                              src={getImageUrl(productDetail.image)}
                               alt={productDetail.name}
                               className="h-10 w-10 object-cover rounded-lg border border-slate-100 dark:border-slate-800"
                               onError={(e) => {
