@@ -12,6 +12,8 @@ import {
   CheckCircle,
   AlertTriangle,
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { getErrorMessage } from '../helpers/errorHelper';
 
 export const CreateStaff: React.FC = () => {
   const [createStaff, { isLoading }] = useCreateStaffMutation();
@@ -42,6 +44,7 @@ export const CreateStaff: React.FC = () => {
 
     if (!name || !email || !password || !role) {
       setError('Please fill in all required fields.');
+      toast.error('Please fill in all required fields.');
       return;
     }
 
@@ -56,10 +59,14 @@ export const CreateStaff: React.FC = () => {
 
     try {
       await createStaff(payload).unwrap();
-      setSuccess(`Staff account for ${name} (${role}) created successfully! They can log in immediately.`);
+      const msg = `Staff account for ${name} (${role}) created successfully!`;
+      setSuccess(`${msg} They can log in immediately.`);
+      toast.success(msg);
       resetForm();
     } catch (err: any) {
-      setError(err?.data?.message || 'Failed to create staff account. Please verify details.');
+      const errMsg = getErrorMessage(err);
+      setError(errMsg);
+      toast.error(errMsg);
     }
   };
 

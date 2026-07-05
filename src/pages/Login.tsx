@@ -4,6 +4,8 @@ import { useLoginMutation } from '../redux/api/authApi';
 import { useAppDispatch } from '../redux/hooks';
 import { setCredentials, type UserPayload } from '../redux/slices/authSlice';
 import { Lock, Mail, Loader2, ArrowRight } from 'lucide-react';
+import { toast } from 'sonner';
+import { getErrorMessage } from '../helpers/errorHelper';
 
 const decodeToken = (token: string): any => {
   try {
@@ -31,6 +33,7 @@ export const Login: React.FC = () => {
 
     if (!email || !password) {
       setError('Please fill in all fields.');
+      toast.error('Please fill in all fields.');
       return;
     }
 
@@ -52,10 +55,13 @@ export const Login: React.FC = () => {
       };
 
       dispatch(setCredentials({ user, token }));
+      toast.success('Logged in successfully!');
       navigate('/dashboard');
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err?.data?.message || err?.message || 'Login failed. Please try again.');
+      const errMsg = getErrorMessage(err);
+      setError(errMsg);
+      toast.error(errMsg);
     }
   };
 

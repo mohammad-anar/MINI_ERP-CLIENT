@@ -8,6 +8,8 @@ import {
 } from '../redux/api/productApi';
 import { useAppSelector } from '../redux/hooks';
 import { getImageUrl } from '../helpers/image';
+import { toast } from 'sonner';
+import { getErrorMessage } from '../helpers/errorHelper';
 import {
   Plus,
   Search,
@@ -165,8 +167,11 @@ export const Products: React.FC = () => {
       await createProduct(formData).unwrap();
       setIsCreateOpen(false);
       resetForm();
+      toast.success('Product created successfully!');
     } catch (err: any) {
-      setFormError(err?.data?.message || 'Failed to create product.');
+      const errMsg = getErrorMessage(err);
+      setFormError(errMsg);
+      toast.error(errMsg);
     }
   };
 
@@ -200,8 +205,11 @@ export const Products: React.FC = () => {
     try {
       await updateProduct({ id: selectedProductId, formData }).unwrap();
       handleCloseEdit();
+      toast.success('Product updated successfully!');
     } catch (err: any) {
-      setFormError(err?.data?.message || 'Failed to update product.');
+      const errMsg = getErrorMessage(err);
+      setFormError(errMsg);
+      toast.error(errMsg);
     }
   };
 
@@ -211,8 +219,11 @@ export const Products: React.FC = () => {
       await deleteProduct(selectedProductId).unwrap();
       setIsDeleteOpen(false);
       setSelectedProductId(null);
+      toast.success('Product deleted successfully!');
     } catch (err: any) {
       console.error('Delete error', err);
+      const errMsg = getErrorMessage(err);
+      toast.error(errMsg);
     }
   };
 

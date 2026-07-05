@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useGetProductsQuery } from '../redux/api/productApi';
 import { useCreateSaleMutation } from '../redux/api/salesApi';
 import { getImageUrl } from '../helpers/image';
+import { toast } from 'sonner';
+import { getErrorMessage } from '../helpers/errorHelper';
 import {
   Search,
   Plus,
@@ -103,6 +105,7 @@ export const CreateSale: React.FC = () => {
 
     if (cart.length === 0) {
       setError('Please add products to the cart first.');
+      toast.error('Please add products to the cart first.');
       return;
     }
 
@@ -115,10 +118,14 @@ export const CreateSale: React.FC = () => {
 
     try {
       await createSale(payload).unwrap();
-      setSuccess('Sale transaction completed successfully!');
+      const msg = 'Sale transaction completed successfully!';
+      setSuccess(msg);
+      toast.success(msg);
       setCart([]);
     } catch (err: any) {
-      setError(err?.data?.message || 'Checkout failed. Please check stock levels.');
+      const errMsg = getErrorMessage(err);
+      setError(errMsg);
+      toast.error(errMsg);
     }
   };
 

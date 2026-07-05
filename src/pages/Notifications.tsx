@@ -4,6 +4,8 @@ import {
   useMarkAllReadMutation,
   useMarkReadMutation,
 } from '../redux/api/notificationApi';
+import { toast } from 'sonner';
+import { getErrorMessage } from '../helpers/errorHelper';
 import {
   Bell,
   AlertTriangle,
@@ -23,16 +25,22 @@ export const Notifications: React.FC = () => {
   const handleMarkAllRead = async () => {
     try {
       await markAllRead(undefined).unwrap();
+      toast.success('All notifications marked as read');
     } catch (err) {
       console.error('Failed to mark all notifications as read:', err);
+      const errMsg = getErrorMessage(err);
+      toast.error(errMsg);
     }
   };
 
   const handleMarkRead = async (id: string) => {
     try {
       await markRead(id).unwrap();
+      toast.success('Notification marked as read');
     } catch (err) {
       console.error('Failed to mark notification as read:', err);
+      const errMsg = getErrorMessage(err);
+      toast.error(errMsg);
     }
   };
 
