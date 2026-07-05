@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCreateStaffMutation } from '../redux/api/authApi';
+import { useCreateStaffMutation, useGetUsersStatsQuery } from '../redux/api/authApi';
 import {
   UserPlus,
   Mail,
@@ -11,6 +11,10 @@ import {
   Loader2,
   CheckCircle,
   AlertTriangle,
+  Search,
+  X,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getErrorMessage } from '../helpers/errorHelper';
@@ -27,6 +31,26 @@ export const CreateStaff: React.FC = () => {
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
+  const [statsSearch, setStatsSearch] = useState('');
+  const [statsRole, setStatsRole] = useState('');
+  const [statsPage, setStatsPage] = useState(1);
+
+  const { data: statsResponse, isLoading: isStatsLoading } = useGetUsersStatsQuery(
+    {
+      searchTerm: statsSearch || undefined,
+      role: statsRole || undefined,
+      page: statsPage,
+      limit: 5,
+    },
+    {
+      skip: !isStatsOpen,
+    }
+  );
+
+  const statsData = statsResponse?.data || [];
+  const statsPagination = statsResponse?.pagination || { page: 1, limit: 5, totalPage: 1, total: 0 };
 
   const resetForm = () => {
     setName('');
@@ -89,14 +113,23 @@ export const CreateStaff: React.FC = () => {
 
       {/* Main card */}
       <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden p-6">
-        <div className="flex items-center gap-2 pb-4 border-b border-slate-100 dark:border-slate-900 mb-6">
-          <div className="p-2 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-lg">
-            <UserPlus size={18} />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-900 mb-6">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-lg">
+              <UserPlus size={18} />
+            </div>
+            <div className="text-left">
+              <h3 className="text-sm font-bold text-slate-850 dark:text-slate-100">Create Staff Member</h3>
+              <p className="text-[10px] text-slate-400">Register a new system user with specialized roles and permissions</p>
+            </div>
           </div>
-          <div className="text-left">
-            <h3 className="text-sm font-bold text-slate-850 dark:text-slate-100">Create Staff Member</h3>
-            <p className="text-[10px] text-slate-400">Register a new system user with specialized roles and permissions</p>
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsStatsOpen(true)}
+            className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg font-bold hover:bg-purple-600 hover:text-white hover:border-purple-600 dark:hover:bg-purple-600 dark:hover:border-purple-600 cursor-pointer transition-all self-start sm:self-center"
+          >
+            <Shield size={14} /> View Staff Statistics
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -237,6 +270,164 @@ export const CreateStaff: React.FC = () => {
 
         </form>
       </div>
+
+      {/* ─── STAFF STATISTICS POPUP MODAL ─────────────────────────── */}
+      {isStatsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-scale-up text-left">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-950/50">
+              <div className="flex items-center gap-2">
+                <Shield className="text-purple-600 dark:text-purple-400" size={18} />
+                <div>
+                  <h3 className="text-sm font-bold text-slate-850 dark:text-slate-100">Registered Staff & Transaction Stats</h3>
+                  <p className="text-[10px] text-slate-400">View active users, transaction counts, and generated revenue metrics</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsStatsOpen(false)}
+                className="p-1 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-900 text-slate-400 hover:text-slate-600 transition-all cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Filters Bar */}
+            <div className="flex flex-col sm:flex-row gap-4 p-5 border-b border-slate-100 dark:border-slate-900 bg-white dark:bg-slate-950">
+              {/* Search */}
+              <div className="relative flex-1">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                  <Search size={14} />
+                </span>
+                <input
+                  type="text"
+                  value={statsSearch}
+                  onChange={(e) => {
+                    setStatsSearch(e.target.value);
+                    setStatsPage(1); // reset page on search
+                  }}
+                  placeholder="Search staff by name, email, contact..."
+                  className="w-full text-[11px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 pl-8.5 pr-3 focus:outline-none focus:border-purple-500 transition-all"
+                />
+              </div>
+
+              {/* Role filter */}
+              <div className="w-full sm:w-48">
+                <select
+                  value={statsRole}
+                  onChange={(e) => {
+                    setStatsRole(e.target.value);
+                    setStatsPage(1); // reset page on filter
+                  }}
+                  className="w-full text-[11px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2 px-3 focus:outline-none focus:border-purple-500 transition-all"
+                >
+                  <option value="">All Roles</option>
+                  <option value="ADMIN">Admins Only</option>
+                  <option value="MANAGER">Managers Only</option>
+                  <option value="EMPLOYEE">Employees Only</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Stats Table / List Content */}
+            <div className="flex-1 overflow-y-auto p-5 min-h-[250px]">
+              {isStatsLoading ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-2">
+                  <Loader2 className="animate-spin text-purple-600" size={24} />
+                  <p className="text-slate-400 text-[10px]">Loading staff metrics...</p>
+                </div>
+              ) : statsData.length === 0 ? (
+                <div className="text-center py-16 text-slate-400">
+                  <UserPlus className="mx-auto mb-2 opacity-30" size={32} />
+                  <p className="text-[11px] font-semibold">No matching staff accounts found</p>
+                  <p className="text-[10px] text-slate-450 mt-0.5">Try widening your search terms or filters</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto border border-slate-200/50 dark:border-slate-900 rounded-xl">
+                  <table className="w-full min-w-[600px] border-collapse text-[11px]">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-950/30 text-slate-500 font-bold">
+                        <td className="py-2.5 px-4 text-left">Staff Member</td>
+                        <td className="py-2.5 px-4 text-left">Role</td>
+                        <td className="py-2.5 px-4 text-center">Transactions</td>
+                        <td className="py-2.5 px-4 text-right">Revenue Generated</td>
+                        <td className="py-2.5 px-4 text-center">Status</td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {statsData.map((staff: any) => (
+                        <tr
+                          key={staff._id}
+                          className="border-b border-slate-100 dark:border-slate-900/50 hover:bg-slate-50/30 dark:hover:bg-slate-900/10"
+                        >
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2.5 text-left">
+                              <img
+                                src={staff.image || 'https://i.ibb.co/z5YHLV9/profile.png'}
+                                alt={staff.name}
+                                className="h-7 w-7 rounded-full object-cover border border-slate-200 dark:border-slate-800"
+                              />
+                              <div className="min-w-0">
+                                <p className="font-bold text-slate-900 dark:text-slate-100 truncate">{staff.name}</p>
+                                <p className="text-[9px] text-slate-400 mt-0.5 font-mono truncate">{staff.email}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 font-semibold text-slate-650 dark:text-slate-450">
+                            {staff.role}
+                          </td>
+                          <td className="py-3 px-4 text-center font-bold text-slate-900 dark:text-slate-100">
+                            {staff.totalSales}
+                          </td>
+                          <td className="py-3 px-4 text-right font-bold text-purple-700 dark:text-purple-400">
+                            ${(staff.totalRevenue || 0).toFixed(2)}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
+                              staff.status === 'active'
+                                ? 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/5'
+                                : 'bg-rose-500/10 text-rose-600 dark:bg-rose-500/5'
+                            }`}>
+                              {staff.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Pagination Footer */}
+            {statsPagination.totalPage > 1 && (
+              <div className="p-4 border-t border-slate-100 dark:border-slate-900 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/20">
+                <span className="text-[10px] text-slate-405 dark:text-slate-500">
+                  Showing page {statsPagination.page} of {statsPagination.totalPage} ({statsPagination.total} total staff)
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    disabled={statsPagination.page <= 1}
+                    onClick={() => setStatsPage((prev) => prev - 1)}
+                    className="p-1 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 rounded cursor-pointer disabled:opacity-40"
+                  >
+                    <ChevronLeft size={14} />
+                  </button>
+                  <button
+                    disabled={statsPagination.page >= statsPagination.totalPage}
+                    onClick={() => setStatsPage((prev) => prev + 1)}
+                    className="p-1 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 rounded cursor-pointer disabled:opacity-40"
+                  >
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
+            
+          </div>
+        </div>
+      )}
 
     </div>
   );

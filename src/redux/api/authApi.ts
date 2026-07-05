@@ -28,7 +28,21 @@ export const authApi = baseApi.injectEndpoints({
         body: staffData,
       }),
     }),
+    getUsersStats: builder.query({
+      query: (params) => ({
+        url: '/user/users-stats',
+        method: 'GET',
+        params,
+      }),
+      providesTags: ['Users'],
+    }),
   }),
 });
 
-export const { useLoginMutation, useGetProfileQuery, useUpdateProfileMutation, useCreateStaffMutation } = authApi;
+export const {
+  useLoginMutation,
+  useGetProfileQuery,
+  useUpdateProfileMutation,
+  useCreateStaffMutation,
+  useGetUsersStatsQuery,
+} = authApi;
